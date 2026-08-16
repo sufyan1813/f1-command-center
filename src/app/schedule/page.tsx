@@ -14,7 +14,8 @@ const COUNTRY_FLAGS: Record<string, string> = {
   Canada: "🇨🇦", Spain: "🇪🇸", Austria: "🇦🇹", "United Kingdom": "🇬🇧",
   Hungary: "🇭🇺", Belgium: "🇧🇪", Netherlands: "🇳🇱", Italy: "🇮🇹",
   Azerbaijan: "🇦🇿", Singapore: "🇸🇬", Mexico: "🇲🇽", Brazil: "🇧🇷",
-  "United Arab Emirates": "🇦🇪", "Abu Dhabi": "🇦🇪",
+  "United Arab Emirates": "🇦🇪", "Abu Dhabi": "🇦🇪", UAE: "🇦🇪",
+  Qatar: "🇶🇦", Malaysia: "🇲🇾", UK: "🇬🇧", "Great Britain": "🇬🇧",
 };
 
 function getFlag(country: string): string {

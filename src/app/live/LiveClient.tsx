@@ -97,7 +97,9 @@ const COUNTRY_FLAGS: Record<string, string> = {
   China: "🇨🇳", USA: "🇺🇸", Monaco: "🇲🇨", Canada: "🇨🇦", Spain: "🇪🇸",
   Austria: "🇦🇹", "United Kingdom": "🇬🇧", Hungary: "🇭🇺", Belgium: "🇧🇪",
   Netherlands: "🇳🇱", Italy: "🇮🇹", Azerbaijan: "🇦🇿", Singapore: "🇸🇬",
-  Mexico: "🇲🇽", Brazil: "🇧🇷", "United Arab Emirates": "🇦🇪", Qatar: "🇶🇦",
+  Mexico: "🇲🇽", Brazil: "🇧🇷",
+  "United Arab Emirates": "🇦🇪", "Abu Dhabi": "🇦🇪", UAE: "🇦🇪",
+  Qatar: "🇶🇦", Malaysia: "🇲🇾", UK: "🇬🇧", "Great Britain": "🇬🇧",
 };
 
 export default function LiveClient({ schedule }: { schedule: Race[] }) {
