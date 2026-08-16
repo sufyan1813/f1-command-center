@@ -7,6 +7,7 @@ import {
   ArrowLeft, MapPin, Calendar, Clock, Trophy, Zap,
   RotateCcw, Flag, Activity, Route,
 } from "lucide-react";
+import LocalTime from "@/components/LocalTime";
 
 interface Props {
   params: Promise<{ circuitId: string }>;
@@ -246,7 +247,10 @@ export default async function CircuitDetailPage({ params }: Props) {
                           {s.date && <p className="text-xs text-muted">{formatDate(s.date)}</p>}
                         </div>
                         <div className="text-right shrink-0">
-                          {s.time && <p className="text-xs font-mono text-muted">{formatTime(s.time)}</p>}
+                          {s.time && (s.date
+                            ? <LocalTime date={s.date} time={s.time} />
+                            : <p className="text-xs font-mono text-muted">{formatTime(s.time)}</p>
+                          )}
                           {done && <p className="text-xs text-green-400 font-semibold">Done</p>}
                         </div>
                       </div>

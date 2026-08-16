@@ -195,7 +195,10 @@ export default function LiveClient({ schedule }: { schedule: Race[] }) {
                   <p className="text-muted text-sm mt-0.5">{nextSched.raceName}</p>
                   <p className="text-f1-red font-bold text-sm mt-2">{timeUntil(nextSched.date)}</p>
                   <p className="text-xs text-muted font-mono mt-0.5">
-                    {nextSched.date.toUTCString().replace(" GMT", " UTC")}
+                    {nextSched.date.toLocaleString(undefined, {
+                      weekday: "short", month: "short", day: "numeric",
+                      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                    })}
                   </p>
                 </div>
               </div>

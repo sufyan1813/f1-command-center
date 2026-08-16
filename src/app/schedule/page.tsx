@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { getRaceSchedule, getLastRaceResults } from "@/lib/api";
 import type { Race } from "@/lib/types";
 import { MapPin, Clock, CheckCircle, ChevronRight } from "lucide-react";
+import LocalTime from "@/components/LocalTime";
 
 export const metadata: Metadata = { title: "Schedule" };
 
@@ -24,12 +25,6 @@ function formatSessionDate(race: Race): string {
   return new Date(race.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function formatSessionTime(time?: string): string | null {
-  if (!time) return null;
-  const [h, m] = time.replace("Z", "").split(":").map(Number);
-  const suffix = h >= 12 ? "PM" : "AM";
-  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${suffix} UTC`;
-}
 
 function isPast(race: Race): boolean {
   return new Date(`${race.date}T${race.time ?? "23:59:59Z"}`) < new Date();
@@ -92,7 +87,7 @@ export default async function SchedulePage() {
                           {race.time && (
                             <span className="flex items-center gap-1">
                               <Clock size={10} />
-                              {formatSessionTime(race.time)}
+                              <LocalTime date={race.date} time={race.time} />
                             </span>
                           )}
                         </div>
