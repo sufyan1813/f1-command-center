@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0D0D0D;
+  --foreground: #FFFFFF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* F1 Brand */
+  --color-f1-red: #E10600;
+  --color-f1-red-dark: #B20500;
+  --color-surface: #1A1A1A;
+  --color-elevated: #252525;
+  --color-border: #2E2E2E;
+  --color-muted: #6B7280;
+
+  /* Podium */
+  --color-gold: #FFD700;
+  --color-silver: #C0C0C0;
+  --color-bronze: #CD7F32;
+
+  /* Tyre compounds */
+  --color-soft: #FF3333;
+  --color-medium: #FFF200;
+  --color-hard: #EEEEEE;
+  --color-inter: #39B54A;
+  --color-wet: #0067FF;
+
+  /* Constructor colours */
+  --color-rb: #3671C6;
+  --color-ferrari: #E8002D;
+  --color-mercedes: #27F4D2;
+  --color-mclaren: #FF8000;
+  --color-aston: #229971;
+  --color-alpine: #FF87BC;
+  --color-williams: #64C4FF;
+  --color-haas: #B6BABD;
+  --color-sauber: #52E252;
+  --color-vcarb: #6692FF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* Thin F1-red scrollbar */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E10600; border-radius: 2px; }
+
+/* Live pulse */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}
+.live-dot { animation: pulse-live 1.4s ease-in-out infinite; }
+
+/* Countdown digit flip */
+@keyframes flip-in {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to { transform: rotateX(0); opacity: 1; }
+}
+.digit-flip { animation: flip-in 0.3s ease-out; }
+
+/* Safe area */
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 1rem); }
