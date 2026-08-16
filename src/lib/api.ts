@@ -146,22 +146,21 @@ export async function getDriverSeasonResults(driverId: string): Promise<Race[]> 
   return data?.MRData.RaceTable.Races ?? [];
 }
 
+function toRaceDate(r: Race): Date {
+  // API returns times with trailing Z (e.g. "13:10:00Z"); strip it before
+  // re-appending so we never produce an invalid double-Z ISO string.
+  const time = r.time ? r.time.replace(/Z$/, "") : "00:00:00";
+  return new Date(`${r.date}T${time}Z`);
+}
+
 export function getNextRace(races: Race[]): Race | null {
   const now = new Date();
-  return (
-    races.find((r) => {
-      const raceDate = new Date(`${r.date}T${r.time ?? "00:00:00"}Z`);
-      return raceDate > now;
-    }) ?? null
-  );
+  return races.find((r) => toRaceDate(r) > now) ?? null;
 }
 
 export function getLastCompletedRace(races: Race[]): Race | null {
   const now = new Date();
-  const past = races.filter((r) => {
-    const raceDate = new Date(`${r.date}T${r.time ?? "00:00:00"}Z`);
-    return raceDate <= now;
-  });
+  const past = races.filter((r) => toRaceDate(r) <= now);
   return past[past.length - 1] ?? null;
 }
 

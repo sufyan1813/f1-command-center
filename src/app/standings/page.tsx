@@ -36,8 +36,10 @@ function PointsBar({ points, max }: { points: number; max: number }) {
   );
 }
 
-function DriverRow({ d, maxPts }: { d: DriverStanding; maxPts: number }) {
+function DriverRow({ d, maxPts, leaderPts }: { d: DriverStanding; maxPts: number; leaderPts: number }) {
   const pos = parseInt(d.position);
+  const pts = parseInt(d.points);
+  const gap = leaderPts - pts;
   const color = getTeamColor(d.Constructors[0]?.constructorId ?? "");
   return (
     <div className={`rounded-xl border border-border px-4 py-3 flex items-center gap-3 ${pos <= 3 ? "bg-elevated" : "bg-surface"}`}>
@@ -49,18 +51,23 @@ function DriverRow({ d, maxPts }: { d: DriverStanding; maxPts: number }) {
           <span className="font-semibold text-sm truncate">{d.Driver.givenName} {d.Driver.familyName}</span>
         </div>
         <p className="text-xs text-muted truncate">{d.Constructors[0]?.name}</p>
-        <PointsBar points={parseInt(d.points)} max={maxPts} />
+        <PointsBar points={pts} max={maxPts} />
       </div>
       <div className="text-right shrink-0">
         <p className="text-lg font-bold">{d.points}</p>
-        <p className="text-xs text-muted">{d.wins}W</p>
+        {pos === 1
+          ? <p className="text-xs font-bold text-gold">{d.wins}W · Leader</p>
+          : <p className="text-xs text-muted">-{gap}pts</p>
+        }
       </div>
     </div>
   );
 }
 
-function ConstructorRow({ c, maxPts }: { c: ConstructorStanding; maxPts: number }) {
+function ConstructorRow({ c, maxPts, leaderPts }: { c: ConstructorStanding; maxPts: number; leaderPts: number }) {
   const pos = parseInt(c.position);
+  const pts = parseInt(c.points);
+  const gap = leaderPts - pts;
   const color = getTeamColor(c.Constructor.constructorId);
   return (
     <div className={`rounded-xl border border-border px-4 py-3 flex items-center gap-3 ${pos <= 3 ? "bg-elevated" : "bg-surface"}`}>
@@ -69,11 +76,14 @@ function ConstructorRow({ c, maxPts }: { c: ConstructorStanding; maxPts: number 
       <div className="flex-1 min-w-0">
         <p className="font-semibold truncate">{c.Constructor.name}</p>
         <p className="text-xs text-muted">{c.Constructor.nationality}</p>
-        <PointsBar points={parseInt(c.points)} max={maxPts} />
+        <PointsBar points={pts} max={maxPts} />
       </div>
       <div className="text-right shrink-0">
         <p className="text-lg font-bold">{c.points}</p>
-        <p className="text-xs text-muted">{c.wins}W</p>
+        {pos === 1
+          ? <p className="text-xs font-bold text-gold">{c.wins}W · Leader</p>
+          : <p className="text-xs text-muted">-{gap}pts</p>
+        }
       </div>
     </div>
   );
@@ -136,7 +146,7 @@ export default function StandingsPage() {
                 Drivers Championship
               </h2>
               <div className="space-y-1.5">
-                {drivers.map((d) => <DriverRow key={d.Driver.driverId} d={d} maxPts={maxDriverPts} />)}
+                {drivers.map((d) => <DriverRow key={d.Driver.driverId} d={d} maxPts={maxDriverPts} leaderPts={maxDriverPts} />)}
               </div>
             </div>
 
@@ -146,7 +156,7 @@ export default function StandingsPage() {
                 Constructors Championship
               </h2>
               <div className="space-y-1.5">
-                {constructors.map((c) => <ConstructorRow key={c.Constructor.constructorId} c={c} maxPts={maxConPts} />)}
+                {constructors.map((c) => <ConstructorRow key={c.Constructor.constructorId} c={c} maxPts={maxConPts} leaderPts={maxConPts} />)}
               </div>
             </div>
           </div>
