@@ -1,23 +1,12 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { getAllDriverChampions, getSeasonDrivers } from "@/lib/api";
+import { getSeasonDrivers } from "@/lib/api";
 import { getTeamColor } from "@/lib/teamColors";
 import { Crown, Star } from "lucide-react";
+import { F1_CHAMPIONS } from "@/lib/championsData";
 
 export const metadata: Metadata = { title: "History" };
-
-const STATIC_RECORDS = [
-  { label: "Most Race Wins",          value: "104+",    holder: "Lewis Hamilton",         detail: "2007 – present (Ferrari 2025)" },
-  { label: "Most Pole Positions",     value: "104+",    holder: "Lewis Hamilton",         detail: "Unmatched qualifying pace" },
-  { label: "Most Constructor Titles", value: "16",      holder: "Ferrari",                detail: "1961–2008" },
-  { label: "Youngest WDC",            value: "23 yrs",  holder: "Sebastian Vettel",       detail: "2010 — Red Bull Racing" },
-  { label: "Youngest Race Winner",    value: "18 yrs",  holder: "Max Verstappen",         detail: "Spain GP 2016 (Red Bull)" },
-  { label: "Most Podiums",            value: "197+",    holder: "Lewis Hamilton",         detail: "Consistent across 4 eras" },
-  { label: "Most Wins in a Season",   value: "19/22",   holder: "Max Verstappen",         detail: "2023 — historic dominance" },
-  { label: "Most Points in a Season", value: "575",     holder: "Max Verstappen",         detail: "2023 — 19 race wins" },
-  { label: "Longest Career",          value: "~19 yrs", holder: "Rubens Barrichello",     detail: "1993–2011 (323 starts)" },
-];
 
 const ERAS = [
   { years: "1950–1961", name: "The Front-Engine Era",    desc: "Alfa Romeo, Ferrari, and Maserati dominated the early years. Fangio's 5 championships defined the sport's foundation." },
@@ -30,34 +19,41 @@ const ERAS = [
 ];
 
 export default async function HistoryPage() {
-  const [champions, currentDrivers] = await Promise.all([
-    getAllDriverChampions(),
-    getSeasonDrivers(),
-  ]);
+  const currentDrivers = await getSeasonDrivers();
   const activeDriverIds = new Set(currentDrivers.map((d) => d.driverId));
 
-  const multiChamps: Record<string, { count: number; driverId: string }> = {};
-  for (const season of champions) {
-    const ds = season.DriverStandings[0];
-    if (!ds) continue;
-    const name = `${ds.Driver.givenName} ${ds.Driver.familyName}`;
-    if (!multiChamps[name]) multiChamps[name] = { count: 0, driverId: ds.Driver.driverId };
-    multiChamps[name].count += 1;
+  // Sorted newest first (F1_CHAMPIONS is oldest-first)
+  const champions = [...F1_CHAMPIONS].reverse();
+
+  // Count titles per driver
+  const titleCounts: Record<string, number> = {};
+  for (const c of F1_CHAMPIONS) {
+    const key = `${c.givenName} ${c.familyName}`;
+    titleCounts[key] = (titleCounts[key] ?? 0) + 1;
   }
 
-  // Compute dynamic "Most Driver Titles" from champions data
-  const maxTitles = Math.max(1, ...Object.values(multiChamps).map((v) => v.count));
-  const topNames = Object.entries(multiChamps)
-    .filter(([, v]) => v.count === maxTitles)
+  // Compute Most Driver Titles dynamically
+  const maxTitles = Math.max(...Object.values(titleCounts));
+  const topNames = Object.entries(titleCounts)
+    .filter(([, count]) => count === maxTitles)
     .map(([name]) => name.split(" ").pop()!);
-  const titlesRecord = {
-    label: "Most Driver Titles",
-    value: topNames.length > 1 ? `${maxTitles} each` : `${maxTitles}`,
-    holder: topNames.length > 1 ? topNames.join(" & ") : (Object.keys(multiChamps).find((n) => multiChamps[n].count === maxTitles) ?? "—"),
-    detail: topNames.length > 1 ? `Record tied (${maxTitles} titles each)` : `Sole record holder`,
-  };
+  const titlesHolder =
+    topNames.length > 1
+      ? topNames.join(" & ")
+      : (Object.keys(titleCounts).find((n) => titleCounts[n] === maxTitles) ?? "—");
 
-  const RECORDS = [titlesRecord, ...STATIC_RECORDS];
+  const RECORDS = [
+    { label: "Most Driver Titles",      value: topNames.length > 1 ? `${maxTitles} each` : `${maxTitles}`, holder: titlesHolder, detail: topNames.length > 1 ? "Record shared" : "Sole record holder" },
+    { label: "Most Race Wins",          value: "104+",    holder: "Lewis Hamilton",         detail: "2007 – present (Ferrari 2025)" },
+    { label: "Most Pole Positions",     value: "104+",    holder: "Lewis Hamilton",         detail: "Unmatched qualifying pace" },
+    { label: "Most Constructor Titles", value: "16",      holder: "Ferrari",                detail: "1961–2008" },
+    { label: "Youngest WDC",            value: "23 yrs",  holder: "Sebastian Vettel",       detail: "2010 — Red Bull Racing" },
+    { label: "Youngest Race Winner",    value: "18 yrs",  holder: "Max Verstappen",         detail: "Spain GP 2016 (Red Bull)" },
+    { label: "Most Podiums",            value: "197+",    holder: "Lewis Hamilton",         detail: "Consistent across 4 eras" },
+    { label: "Most Wins in a Season",   value: "19/22",   holder: "Max Verstappen",         detail: "2023 — historic dominance" },
+    { label: "Most Points in a Season", value: "575",     holder: "Max Verstappen",         detail: "2023 — 19 race wins" },
+    { label: "Longest Career",          value: "~19 yrs", holder: "Rubens Barrichello",     detail: "1993–2011 (323 starts)" },
+  ];
 
   return (
     <div>
@@ -117,41 +113,38 @@ export default async function HistoryPage() {
               </h2>
             </div>
             <div className="space-y-1.5">
-              {champions.map((season) => {
-                const ds = season.DriverStandings[0];
-                if (!ds) return null;
-                const cid = ds.Constructors[0]?.constructorId ?? "";
-                const color = getTeamColor(cid);
-                const fullName = `${ds.Driver.givenName} ${ds.Driver.familyName}`;
-                const count = multiChamps[fullName]?.count ?? 1;
-                const isActive = activeDriverIds.has(ds.Driver.driverId);
+              {champions.map((c) => {
+                const color = getTeamColor(c.constructorId);
+                const fullName = `${c.givenName} ${c.familyName}`;
+                const count = titleCounts[fullName] ?? 1;
+                const isActive = activeDriverIds.has(c.driverId);
                 const rowContent = (
                   <>
                     <span className="font-mono font-bold text-f1-red w-10 shrink-0 text-sm">
-                      {season.season}
+                      {c.season}
                     </span>
                     <div className="w-1 h-8 rounded-full shrink-0" style={{ background: color }} />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{fullName}</p>
-                      <p className="text-xs text-muted truncate">{ds.Constructors[0]?.name}</p>
+                      <p className="text-xs text-muted truncate">{c.constructorName}</p>
                     </div>
                     <div className="text-right shrink-0">
                       {count > 1 && <span className="text-xs text-gold font-bold block">×{count}</span>}
-                      <p className="text-xs text-muted">{ds.points}pts</p>
+                      <p className="text-xs text-muted">{c.points}pts</p>
                     </div>
                   </>
                 );
                 return isActive ? (
                   <Link
-                    key={season.season}
-                    href={`/drivers/${ds.Driver.driverId}`}
+                    key={c.season}
+                    href={`/drivers/${c.driverId}`}
                     className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 hover:bg-elevated hover:border-f1-red/30 transition-colors"
                   >
                     {rowContent}
                   </Link>
                 ) : (
                   <div
-                    key={season.season}
+                    key={c.season}
                     className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5"
                   >
                     {rowContent}
