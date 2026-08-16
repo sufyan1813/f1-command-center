@@ -62,7 +62,7 @@ export const COUNTRY_FLAGS: Record<string, string> = {
   Mexican: "🇲🇽", Monegasque: "🇲🇨", Saudi: "🇸🇦", Spanish: "🇪🇸",
   Swiss: "🇨🇭", American: "🇺🇸", Finnish: "🇫🇮", Polish: "🇵🇱",
   Thai: "🇹🇭", Danish: "🇩🇰", New_Zealander: "🇳🇿", Argentine: "🇦🇷",
-  South_African: "🇿🇦", Canadian: "🇨🇦", Singaporean: "🇸🇬",
+  South_African: "🇿🇦", Singaporean: "🇸🇬",
 };
 
 export const CIRCUIT_COUNTRIES: Record<string, string> = {
