@@ -250,6 +250,9 @@ export default async function DriverDetailPage({ params }: Props) {
                           <span className="text-base leading-none">{getCountryFlag(race.Circuit.Location.country)}</span>
                           <span className="font-medium truncate text-xs sm:text-sm">{race.raceName}</span>
                           {isWin && <span className="text-xs">🏆</span>}
+                          {result?.FastestLap?.rank === "1" && (
+                            <span className="text-xs font-bold text-purple-400 bg-purple-400/10 border border-purple-400/30 rounded px-1 py-0.5">FL</span>
+                          )}
                         </div>
                         <p className="text-xs text-muted mt-0.5">{formatDate(race.date)}</p>
                       </div>

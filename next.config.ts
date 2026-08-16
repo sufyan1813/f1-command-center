@@ -20,6 +20,7 @@ const securityHeaders = [
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://api.jolpi.ca https://api.openf1.org",
       "manifest-src 'self'",
+      "frame-ancestors 'self'",
     ].join("; "),
   },
 ];

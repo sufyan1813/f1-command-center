@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { getAllDriverChampions } from "@/lib/api";
 import { getTeamColor } from "@/lib/teamColors";
@@ -6,17 +7,16 @@ import { Crown, Star } from "lucide-react";
 
 export const metadata: Metadata = { title: "History" };
 
-const RECORDS = [
-  { label: "Most Driver Titles",      value: "7 each", holder: "Hamilton & Schumacher", detail: "Record tied in 2020" },
-  { label: "Most Race Wins",          value: "103+",   holder: "Lewis Hamilton",         detail: "2007 – still active" },
-  { label: "Most Pole Positions",     value: "100+",   holder: "Lewis Hamilton",         detail: "Unmatched qualifying pace" },
-  { label: "Most Constructor Titles", value: "16",     holder: "Ferrari",                detail: "1961–2008" },
-  { label: "Youngest WDC",            value: "23 yrs", holder: "Sebastian Vettel",       detail: "2010 — Red Bull Racing" },
-  { label: "Youngest Race Winner",    value: "18 yrs", holder: "Max Verstappen",         detail: "Spain GP 2016 (Red Bull)" },
-  { label: "Most Podiums",            value: "195+",   holder: "Lewis Hamilton",         detail: "Consistent across 4 eras" },
-  { label: "Most Wins in a Season",   value: "19/22",  holder: "Max Verstappen",         detail: "2023 — historic dominance" },
-  { label: "Most Points in a Season", value: "575",    holder: "Max Verstappen",         detail: "2023 — 19 race wins" },
-  { label: "Longest Career",          value: "~19 yrs",holder: "Rubens Barrichello",     detail: "1993–2011 (323 starts)" },
+const STATIC_RECORDS = [
+  { label: "Most Race Wins",          value: "104+",    holder: "Lewis Hamilton",         detail: "2007 – present (Ferrari 2025)" },
+  { label: "Most Pole Positions",     value: "104+",    holder: "Lewis Hamilton",         detail: "Unmatched qualifying pace" },
+  { label: "Most Constructor Titles", value: "16",      holder: "Ferrari",                detail: "1961–2008" },
+  { label: "Youngest WDC",            value: "23 yrs",  holder: "Sebastian Vettel",       detail: "2010 — Red Bull Racing" },
+  { label: "Youngest Race Winner",    value: "18 yrs",  holder: "Max Verstappen",         detail: "Spain GP 2016 (Red Bull)" },
+  { label: "Most Podiums",            value: "197+",    holder: "Lewis Hamilton",         detail: "Consistent across 4 eras" },
+  { label: "Most Wins in a Season",   value: "19/22",   holder: "Max Verstappen",         detail: "2023 — historic dominance" },
+  { label: "Most Points in a Season", value: "575",     holder: "Max Verstappen",         detail: "2023 — 19 race wins" },
+  { label: "Longest Career",          value: "~19 yrs", holder: "Rubens Barrichello",     detail: "1993–2011 (323 starts)" },
 ];
 
 const ERAS = [
@@ -32,13 +32,28 @@ const ERAS = [
 export default async function HistoryPage() {
   const champions = await getAllDriverChampions();
 
-  const multiChamps: Record<string, number> = {};
+  const multiChamps: Record<string, { count: number; driverId: string }> = {};
   for (const season of champions) {
     const ds = season.DriverStandings[0];
     if (!ds) continue;
     const name = `${ds.Driver.givenName} ${ds.Driver.familyName}`;
-    multiChamps[name] = (multiChamps[name] ?? 0) + 1;
+    if (!multiChamps[name]) multiChamps[name] = { count: 0, driverId: ds.Driver.driverId };
+    multiChamps[name].count += 1;
   }
+
+  // Compute dynamic "Most Driver Titles" from champions data
+  const maxTitles = Math.max(1, ...Object.values(multiChamps).map((v) => v.count));
+  const topNames = Object.entries(multiChamps)
+    .filter(([, v]) => v.count === maxTitles)
+    .map(([name]) => name.split(" ").pop()!);
+  const titlesRecord = {
+    label: "Most Driver Titles",
+    value: topNames.length > 1 ? `${maxTitles} each` : `${maxTitles}`,
+    holder: topNames.length > 1 ? topNames.join(" & ") : (Object.keys(multiChamps).find((n) => multiChamps[n].count === maxTitles) ?? "—"),
+    detail: topNames.length > 1 ? `Record tied (${maxTitles} titles each)` : `Sole record holder`,
+  };
+
+  const RECORDS = [titlesRecord, ...STATIC_RECORDS];
 
   return (
     <div>
@@ -48,9 +63,12 @@ export default async function HistoryPage() {
 
         {/* All-time records */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <Crown size={16} className="text-gold" />
-            <h2 className="text-xs text-muted uppercase tracking-wider font-semibold">All-time Records</h2>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Crown size={16} className="text-gold" />
+              <h2 className="text-xs text-muted uppercase tracking-wider font-semibold">All-time Records</h2>
+            </div>
+            <span className="text-xs text-muted hidden sm:block">Records verified through 2024</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {RECORDS.map((r) => (
@@ -101,25 +119,26 @@ export default async function HistoryPage() {
                 const cid = ds.Constructors[0]?.constructorId ?? "";
                 const color = getTeamColor(cid);
                 const fullName = `${ds.Driver.givenName} ${ds.Driver.familyName}`;
-                const count = multiChamps[fullName] ?? 1;
+                const count = multiChamps[fullName]?.count ?? 1;
                 return (
-                  <div
+                  <Link
                     key={season.season}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5"
+                    href={`/drivers/${ds.Driver.driverId}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 hover:bg-elevated hover:border-f1-red/30 transition-colors group"
                   >
                     <span className="font-mono font-bold text-f1-red w-10 shrink-0 text-sm">
                       {season.season}
                     </span>
                     <div className="w-1 h-8 rounded-full shrink-0" style={{ background: color }} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{fullName}</p>
+                      <p className="font-semibold text-sm truncate group-hover:text-foreground">{fullName}</p>
                       <p className="text-xs text-muted truncate">{ds.Constructors[0]?.name}</p>
                     </div>
                     <div className="text-right shrink-0">
                       {count > 1 && <span className="text-xs text-gold font-bold block">×{count}</span>}
                       <p className="text-xs text-muted">{ds.points}pts</p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
