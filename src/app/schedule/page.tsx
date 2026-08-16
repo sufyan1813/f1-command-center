@@ -1,8 +1,9 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { getRaceSchedule, getLastRaceResults } from "@/lib/api";
 import type { Race } from "@/lib/types";
-import { MapPin, Clock, CheckCircle } from "lucide-react";
+import { MapPin, Clock, CheckCircle, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Schedule" };
 
@@ -63,9 +64,10 @@ export default async function SchedulePage() {
               {upcoming.map((race) => {
                 const weekend = isThisWeekend(race);
                 return (
-                  <div
+                  <Link
                     key={race.round}
-                    className={`rounded-xl border p-4 ${weekend ? "border-f1-red bg-f1-red/5" : "border-border bg-surface"}`}
+                    href={`/schedule/${race.Circuit.circuitId}`}
+                    className={`rounded-xl border p-4 block hover:bg-elevated transition-colors group ${weekend ? "border-f1-red bg-f1-red/5" : "border-border bg-surface"}`}
                   >
                     {weekend && (
                       <div className="flex items-center gap-1.5 mb-2">
@@ -104,9 +106,10 @@ export default async function SchedulePage() {
                         <p className="text-xs text-muted">Round</p>
                         <p className="text-3xl font-bold text-f1-red leading-none">{race.round}</p>
                         <p className="text-xs font-semibold mt-1">{formatSessionDate(race)}</p>
+                        <ChevronRight size={13} className="text-muted ml-auto mt-1 group-hover:text-f1-red transition-colors" />
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -124,9 +127,10 @@ export default async function SchedulePage() {
               {[...completed].reverse().map((race) => {
                 const isLastRace = race.round === lastRace?.round;
                 return (
-                  <div
+                  <Link
                     key={race.round}
-                    className={`rounded-xl border px-4 py-3 flex items-center gap-3 ${
+                    href={`/schedule/${race.Circuit.circuitId}`}
+                    className={`rounded-xl border px-4 py-3 flex items-center gap-3 group hover:bg-elevated transition-colors ${
                       isLastRace ? "border-border bg-elevated" : "border-border/40 bg-surface/60"
                     }`}
                   >
@@ -137,13 +141,14 @@ export default async function SchedulePage() {
                       </p>
                       <p className="text-xs text-muted">{formatSessionDate(race)}</p>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-0.5">
                       <p className="text-xs text-muted font-mono">R{race.round}</p>
                       {isLastRace && lastRace?.Results?.[0] && (
                         <p className="text-xs font-bold text-gold">{lastRace.Results[0].Driver.code}</p>
                       )}
+                      <ChevronRight size={11} className="text-muted group-hover:text-f1-red transition-colors" />
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

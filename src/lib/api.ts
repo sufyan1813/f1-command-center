@@ -130,6 +130,14 @@ export async function getRaceControlMessages(sessionKey: number): Promise<OF1Rac
 
 // ──────────────── Utilities ────────────────
 
+export async function getCircuitHistory(circuitId: string): Promise<Race[]> {
+  const data = await jolpicaFetch<{ MRData: { RaceTable: { Races: Race[] } } }>(
+    `/circuits/${circuitId}/results/1.json?limit=30`,
+    86400
+  );
+  return data?.MRData.RaceTable.Races ?? [];
+}
+
 export async function getDriverSeasonResults(driverId: string): Promise<Race[]> {
   const data = await jolpicaFetch<{ MRData: { RaceTable: { Races: Race[] } } }>(
     `/current/drivers/${driverId}/results.json?limit=30`,

@@ -66,7 +66,10 @@ export default async function DriverDetailPage({ params }: Props) {
   const color = getTeamColor(constructor?.constructorId ?? "");
   const wins = races.filter((r) => r.Results?.[0]?.position === "1");
   const podiums = races.filter((r) => ["1", "2", "3"].includes(r.Results?.[0]?.position ?? ""));
-  const dnfs = races.filter((r) => r.Results?.[0]?.status && !r.Results[0].status.startsWith("Finished") && r.Results[0].status !== "+1 Lap" && r.Results[0].status !== "+2 Laps");
+  const dnfs = races.filter((r) => {
+    const s = r.Results?.[0]?.status ?? "";
+    return s !== "" && !s.startsWith("Finished") && !s.startsWith("+");
+  });
   const totalPoints = races.reduce((sum, r) => sum + parseFloat(r.Results?.[0]?.points ?? "0"), 0);
 
   return (
