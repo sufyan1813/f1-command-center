@@ -1,8 +1,9 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { getDriverStandings } from "@/lib/api";
 import { getTeamColor, getFlag } from "@/lib/teamColors";
-import { Star, Award } from "lucide-react";
+import { Star, Award, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Drivers" };
 
@@ -27,9 +28,10 @@ export default async function DriversPage() {
             const age = calcAge(driver.dateOfBirth);
 
             return (
-              <div
+              <Link
                 key={driver.driverId}
-                className="rounded-xl border border-border bg-surface overflow-hidden flex flex-col"
+                href={`/drivers/${driver.driverId}`}
+                className="rounded-xl border border-border bg-surface overflow-hidden flex flex-col hover:border-f1-red/50 hover:bg-elevated transition-colors group cursor-pointer"
               >
                 {/* Team color header */}
                 <div className="h-1.5" style={{ background: color }} />
@@ -52,6 +54,7 @@ export default async function DriversPage() {
                       {driver.givenName} {driver.familyName}
                     </h3>
                     {pos === 1 && <Star size={13} className="text-gold shrink-0" fill="currentColor" />}
+                    <ChevronRight size={13} className="text-muted ml-auto group-hover:text-f1-red transition-colors" />
                   </div>
                   <p className="text-xs text-muted mb-3">{constructor?.name}</p>
 
@@ -81,7 +84,7 @@ export default async function DriversPage() {
                     )}
                   </div>
                 </div>
-              </div>
+            </Link>
             );
           })}
         </div>

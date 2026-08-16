@@ -36,6 +36,10 @@ export default async function HomePage() {
   const conLeader = constructorStandings[0] ?? null;
   const top3 = lastRace?.Results?.slice(0, 3) ?? [];
   const season = schedule[0]?.season ?? new Date().getFullYear();
+  const completedCount = schedule.filter(
+    (r) => new Date(`${r.date}T${r.time ?? "23:59:59Z"}`) < new Date()
+  ).length;
+  const seasonComplete = schedule.length >= 20 && completedCount >= schedule.length;
 
   return (
     <div>
@@ -82,9 +86,18 @@ export default async function HomePage() {
                 </div>
               </section>
             ) : (
-              <div className="rounded-2xl border border-border bg-surface p-5 flex items-center gap-3 text-muted">
-                <AlertCircle size={20} />
-                <span className="text-sm">Season complete — tune in next year!</span>
+              <div className="rounded-2xl border border-border bg-surface p-5 flex items-center gap-3">
+                <AlertCircle size={20} className="text-muted shrink-0" />
+                <div>
+                  <p className="font-semibold">
+                    {seasonComplete ? "Season complete" : "Season on break"}
+                  </p>
+                  <p className="text-muted text-sm mt-0.5">
+                    {seasonComplete
+                      ? "Tune in next year for the new season"
+                      : "No upcoming round scheduled yet — check back soon"}
+                  </p>
+                </div>
               </div>
             )}
 
