@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import CountdownTimer from "@/components/CountdownTimer";
 import {
   getDriverStandings,
@@ -9,7 +10,7 @@ import {
 } from "@/lib/api";
 import { getTeamColor } from "@/lib/teamColors";
 import type { Race } from "@/lib/types";
-import { Flag, Trophy, Calendar, AlertCircle, Zap } from "lucide-react";
+import { Flag, Trophy, Calendar, AlertCircle, Zap, ChevronRight } from "lucide-react";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -20,7 +21,8 @@ function formatRaceDate(race: Race): string {
 }
 
 function raceISO(race: Race): string {
-  return `${race.date}T${race.time ?? "12:00:00Z"}`;
+  const time = race.time ? race.time.replace(/Z$/, "") : "00:00:00";
+  return `${race.date}T${time}Z`;
 }
 
 export default async function HomePage() {
@@ -81,9 +83,16 @@ export default async function HomePage() {
                     {nextRace.Circuit.Location.locality}, {nextRace.Circuit.Location.country} · {formatRaceDate(nextRace)}
                   </p>
                 </div>
-                <div className="px-5 pb-5">
+                <div className="px-5 pb-3">
                   <CountdownTimer targetISO={raceISO(nextRace)} label={nextRace.raceName} />
                 </div>
+                <Link
+                  href={`/schedule/${nextRace.Circuit.circuitId}`}
+                  className="flex items-center justify-between px-5 py-3 border-t border-border hover:bg-elevated transition-colors text-sm text-muted hover:text-foreground group"
+                >
+                  <span>Track details &amp; session schedule</span>
+                  <ChevronRight size={14} className="group-hover:text-f1-red transition-colors" />
+                </Link>
               </section>
             ) : (
               <div className="rounded-2xl border border-border bg-surface p-5 flex items-center gap-3">
@@ -137,40 +146,52 @@ export default async function HomePage() {
               </div>
               <div className="divide-y divide-border">
                 {leader && (
-                  <div className="px-5 py-4 flex items-center gap-3">
+                  <Link
+                    href={`/drivers/${leader.Driver.driverId}`}
+                    className="px-5 py-4 flex items-center gap-3 hover:bg-elevated transition-colors group"
+                  >
                     <div
                       className="w-1 h-12 rounded-full shrink-0"
                       style={{ background: getTeamColor(leader.Constructors[0]?.constructorId ?? "") }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted">Drivers Championship</p>
-                      <p className="font-bold text-lg truncate">
+                      <p className="font-bold text-lg truncate group-hover:text-foreground">
                         {leader.Driver.givenName} {leader.Driver.familyName}
                       </p>
                       <p className="text-xs text-muted">{leader.Constructors[0]?.name}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-3xl font-bold text-f1-red">{leader.points}</p>
-                      <p className="text-xs text-muted">points</p>
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      <div>
+                        <p className="text-3xl font-bold text-f1-red">{leader.points}</p>
+                        <p className="text-xs text-muted">points</p>
+                      </div>
+                      <ChevronRight size={14} className="text-muted group-hover:text-f1-red transition-colors" />
                     </div>
-                  </div>
+                  </Link>
                 )}
                 {conLeader && (
-                  <div className="px-5 py-4 flex items-center gap-3">
+                  <Link
+                    href="/standings"
+                    className="px-5 py-4 flex items-center gap-3 hover:bg-elevated transition-colors group"
+                  >
                     <div
                       className="w-1 h-12 rounded-full shrink-0"
                       style={{ background: getTeamColor(conLeader.Constructor.constructorId) }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-muted">Constructors Championship</p>
-                      <p className="font-bold text-lg truncate">{conLeader.Constructor.name}</p>
+                      <p className="font-bold text-lg truncate group-hover:text-foreground">{conLeader.Constructor.name}</p>
                       <p className="text-xs text-muted">{conLeader.wins} wins this season</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-3xl font-bold text-f1-red">{conLeader.points}</p>
-                      <p className="text-xs text-muted">points</p>
+                    <div className="text-right shrink-0 flex items-center gap-2">
+                      <div>
+                        <p className="text-3xl font-bold text-f1-red">{conLeader.points}</p>
+                        <p className="text-xs text-muted">points</p>
+                      </div>
+                      <ChevronRight size={14} className="text-muted group-hover:text-f1-red transition-colors" />
                     </div>
-                  </div>
+                  </Link>
                 )}
               </div>
             </section>
@@ -178,18 +199,26 @@ export default async function HomePage() {
             {/* Last Race */}
             {lastRace && top3.length > 0 && (
               <section className="rounded-2xl border border-border bg-surface">
-                <div className="px-5 pt-5 pb-3 flex items-center gap-2">
+                <Link
+                  href={`/schedule/${lastRace.Circuit.circuitId}`}
+                  className="px-5 pt-5 pb-3 flex items-center gap-2 hover:bg-elevated transition-colors rounded-t-2xl group"
+                >
                   <Flag size={14} className="text-muted" />
-                  <span className="text-xs text-muted uppercase tracking-wider font-semibold">
+                  <span className="text-xs text-muted uppercase tracking-wider font-semibold flex-1">
                     Last Race — {lastRace.raceName}
                   </span>
-                </div>
+                  <ChevronRight size={13} className="text-muted group-hover:text-f1-red transition-colors" />
+                </Link>
                 <div className="pb-4">
                   {top3.map((result, idx) => {
                     const medals = ["🥇", "🥈", "🥉"];
                     const podiumColors = ["text-gold", "text-silver", "text-bronze"];
                     return (
-                      <div key={result.Driver.driverId} className="px-5 py-2.5 flex items-center gap-3">
+                      <Link
+                        key={result.Driver.driverId}
+                        href={`/drivers/${result.Driver.driverId}`}
+                        className="px-5 py-2.5 flex items-center gap-3 hover:bg-elevated transition-colors"
+                      >
                         <span className="text-xl w-7 text-center shrink-0">{medals[idx]}</span>
                         <div
                           className="w-1 h-9 rounded-full shrink-0"
@@ -212,7 +241,7 @@ export default async function HomePage() {
                         <span className={`text-sm font-bold w-10 text-right shrink-0 ${podiumColors[idx]}`}>
                           {result.points}pt
                         </span>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>

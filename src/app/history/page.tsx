@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { getAllDriverChampions } from "@/lib/api";
+import { getAllDriverChampions, getSeasonDrivers } from "@/lib/api";
 import { getTeamColor } from "@/lib/teamColors";
 import { Crown, Star } from "lucide-react";
 
@@ -30,7 +30,11 @@ const ERAS = [
 ];
 
 export default async function HistoryPage() {
-  const champions = await getAllDriverChampions();
+  const [champions, currentDrivers] = await Promise.all([
+    getAllDriverChampions(),
+    getSeasonDrivers(),
+  ]);
+  const activeDriverIds = new Set(currentDrivers.map((d) => d.driverId));
 
   const multiChamps: Record<string, { count: number; driverId: string }> = {};
   for (const season of champions) {
@@ -120,25 +124,38 @@ export default async function HistoryPage() {
                 const color = getTeamColor(cid);
                 const fullName = `${ds.Driver.givenName} ${ds.Driver.familyName}`;
                 const count = multiChamps[fullName]?.count ?? 1;
-                return (
-                  <Link
-                    key={season.season}
-                    href={`/drivers/${ds.Driver.driverId}`}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 hover:bg-elevated hover:border-f1-red/30 transition-colors group"
-                  >
+                const isActive = activeDriverIds.has(ds.Driver.driverId);
+                const rowContent = (
+                  <>
                     <span className="font-mono font-bold text-f1-red w-10 shrink-0 text-sm">
                       {season.season}
                     </span>
                     <div className="w-1 h-8 rounded-full shrink-0" style={{ background: color }} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate group-hover:text-foreground">{fullName}</p>
+                      <p className="font-semibold text-sm truncate">{fullName}</p>
                       <p className="text-xs text-muted truncate">{ds.Constructors[0]?.name}</p>
                     </div>
                     <div className="text-right shrink-0">
                       {count > 1 && <span className="text-xs text-gold font-bold block">×{count}</span>}
                       <p className="text-xs text-muted">{ds.points}pts</p>
                     </div>
+                  </>
+                );
+                return isActive ? (
+                  <Link
+                    key={season.season}
+                    href={`/drivers/${ds.Driver.driverId}`}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5 hover:bg-elevated hover:border-f1-red/30 transition-colors"
+                  >
+                    {rowContent}
                   </Link>
+                ) : (
+                  <div
+                    key={season.season}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-2.5"
+                  >
+                    {rowContent}
+                  </div>
                 );
               })}
             </div>

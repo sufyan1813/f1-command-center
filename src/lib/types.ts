@@ -58,6 +58,7 @@ export interface RaceResult {
   position: string;
   positionText: string;
   points: string;
+  grid?: string;
   Driver: Driver;
   Constructor: Constructor;
   laps: string;

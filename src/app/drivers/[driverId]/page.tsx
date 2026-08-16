@@ -262,9 +262,14 @@ export default async function DriverDetailPage({ params }: Props) {
                         <p className="text-xs text-muted truncate sm:hidden">{race.Circuit.Location.country}</p>
                       </div>
 
-                      <span className={`col-span-1 text-center font-mono text-sm ${posClass}`}>
-                        {isNaN(Number(pos)) ? pos : `P${pos}`}
-                      </span>
+                      <div className="col-span-1 text-center">
+                        <span className={`font-mono text-sm block ${posClass}`}>
+                          {isNaN(Number(pos)) ? pos : `P${pos}`}
+                        </span>
+                        {result?.grid && result.grid !== "0" && result.grid !== pos && (
+                          <span className="text-xs text-muted font-mono">G{result.grid}</span>
+                        )}
+                      </div>
 
                       <span className="col-span-2 text-right font-semibold" style={{ color: parseFloat(result?.points ?? "0") > 0 ? color : undefined }}>
                         {result?.points ?? "—"}
