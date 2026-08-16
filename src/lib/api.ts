@@ -131,8 +131,10 @@ export async function getRaceControlMessages(sessionKey: number): Promise<OF1Rac
 // ──────────────── Utilities ────────────────
 
 export async function getCircuitHistory(circuitId: string): Promise<Race[]> {
+  // limit=100 ensures circuits that returned after a hiatus (e.g. Zandvoort, Imola)
+  // still include their modern-era races alongside the historical ones.
   const data = await jolpicaFetch<{ MRData: { RaceTable: { Races: Race[] } } }>(
-    `/circuits/${circuitId}/results/1.json?limit=30`,
+    `/circuits/${circuitId}/results/1.json?limit=100`,
     86400
   );
   return data?.MRData.RaceTable.Races ?? [];
